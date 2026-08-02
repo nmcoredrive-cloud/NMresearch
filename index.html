@@ -1882,7 +1882,8 @@ footer {
 .rd-page   { transform-origin:22px 22px; animation: rd-page-flip 4.5s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) {
   .rd-bubble,.rd-rung,.rd-blades,.rd-sprout,.rd-gear,.rd-batt-fill,.rd-bolt,.rd-bar,.rd-dot,.rd-beam,.rd-page,
-  .rd-card,.rd-content,.rd-arrow { animation: none !important; transition-duration: 0.01ms !important; }
+  .rd-card,.rd-content,.rd-arrow,
+  .subj-pdf-icon.detailed svg { animation: none !important; transition-duration: 0.01ms !important; }
 }
 .subj-total {
   text-align: center;
@@ -2293,12 +2294,21 @@ body.intro-active { overflow: hidden; }
 .subj-modal-sub { font-size: 0.78rem; color: #C9A84C; letter-spacing: 0.15em; text-transform: uppercase; margin-top: 4px; }
 .subj-modal-close { background: rgba(255,255,255,0.12); border: none; color: #fff; width: 40px; height: 40px; border-radius: 50%; font-size: 1.4rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; flex-shrink: 0; }
 .subj-modal-close:hover { background: rgba(255,80,80,0.6); transform: rotate(90deg); }
-.subj-modal-body { padding: 1.8rem 2rem; overflow-y: auto; display: grid; grid-template-columns: 1fr 1fr; gap: 1.4rem; }
+.subj-modal-body { padding: 1.8rem 2rem; overflow-y: auto; display: grid; grid-template-columns: 1fr; justify-items: center; gap: 1.4rem; }
+.subj-modal-body .subj-pdf-card { max-width: 380px; width: 100%; }
 .subj-pdf-card { border: 1.5px solid #e0e0e8; border-radius: 14px; padding: 1.6rem; display: flex; flex-direction: column; align-items: center; text-align: center; transition: all 0.25s; background: linear-gradient(180deg, #fafaff, #f0f2fa); }
 .subj-pdf-card:hover { border-color: #C9A84C; box-shadow: 0 10px 30px rgba(10,36,99,0.12); transform: translateY(-4px); }
-.subj-pdf-icon { width: 64px; height: 64px; border-radius: 14px; display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; font-size: 1.8rem; }
-.subj-pdf-icon.overview { background: linear-gradient(135deg,#478978,#004836); }
-.subj-pdf-icon.detailed { background: linear-gradient(135deg,#230077,#478978); }
+.subj-pdf-icon { width: 76px; height: 76px; border-radius: 18px; display: flex; align-items: center; justify-content: center; margin-bottom: 1.1rem; position: relative; overflow: visible; }
+.subj-pdf-icon.detailed {
+  background: linear-gradient(145deg, #12308c, #0a2463 55%, #071845);
+  box-shadow: 0 12px 28px rgba(10,36,99,0.32), inset 0 1px 0 rgba(255,255,255,0.18), inset 0 -6px 12px rgba(0,0,0,0.25);
+}
+.subj-pdf-icon.detailed svg { animation: subj-book-float 4s ease-in-out infinite; transform-origin: 50% 62%; filter: drop-shadow(0 6px 8px rgba(0,0,0,0.35)); }
+@keyframes subj-book-float {
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  50%      { transform: translateY(-4px) rotate(2deg); }
+}
+.subj-pdf-card:hover .subj-pdf-icon.detailed svg { animation-duration: 1.8s; }
 .subj-pdf-label { font-family: 'Playfair Display', serif; font-size: 1.05rem; font-weight: 800; color: #0a2463; margin-bottom: 0.3rem; }
 .subj-pdf-desc { font-size: 0.78rem; color: #666; line-height: 1.5; margin-bottom: 1.2rem; }
 .subj-pdf-actions { display: flex; gap: 0.6rem; width: 100%; }
@@ -5684,15 +5694,27 @@ function openSubjectModal(slug){
   }
   title.textContent=name;
   // PDFs live as static files and are only fetched when the visitor clicks.
-  var u1='pdfs/'+slug+'-overview.pdf';
   var u2='pdfs/'+slug+'-detailed.pdf';
   body.innerHTML=
-   '<div class="subj-pdf-card"><div class="subj-pdf-icon overview">\uD83D\uDCD8</div>'+
-   '<div class="subj-pdf-label">Foundational Overview</div>'+
-   '<div class="subj-pdf-desc">Introduction, core concepts, theory and applications of '+name+'.</div>'+
-   '<div class="subj-pdf-actions"><a class="subj-pdf-btn view" href="'+u1+'" target="_blank" rel="noopener">View</a>'+
-   '<a class="subj-pdf-btn download" href="'+u1+'" download="'+name+' - Overview.pdf">Download</a></div></div>'+
-   '<div class="subj-pdf-card"><div class="subj-pdf-icon detailed">\uD83D\uDCD7</div>'+
+   '<div class="subj-pdf-card"><div class="subj-pdf-icon detailed">'+
+     '<svg width="46" height="46" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">'+
+       '<defs>'+
+         '<linearGradient id="bookCover" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1e3a7a"/><stop offset="1" stop-color="#0a2463"/></linearGradient>'+
+         '<linearGradient id="bookSpine" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#071845"/><stop offset="1" stop-color="#040d29"/></linearGradient>'+
+         '<linearGradient id="bookPages" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fffaf0"/><stop offset="1" stop-color="#ecdfc0"/></linearGradient>'+
+         '<linearGradient id="bookRibbon" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e8c96a"/><stop offset="1" stop-color="#C9A84C"/></linearGradient>'+
+       '</defs>'+
+       '<ellipse cx="24" cy="43" rx="15" ry="2.4" fill="#000" opacity="0.16"/>'+
+       '<path d="M10,10 L34,10 L40,4 L16,4 Z" fill="url(#bookPages)"/>'+
+       '<path d="M10,10 L10,12.4 L16,6.4 L16,4 Z" fill="#d8c9a0"/>'+
+       '<path d="M34,10 L34,12.4 L40,6.4 L40,4 Z" fill="#d8c9a0"/>'+
+       '<path d="M34,10 L40,4 L40,36 L34,42 Z" fill="url(#bookSpine)"/>'+
+       '<path d="M10,10 L34,10 L34,42 L10,42 Z" fill="url(#bookCover)" stroke="#C9A84C" stroke-width="0.6" stroke-opacity="0.5"/>'+
+       '<path d="M15,20 h14 M15,25 h14 M15,30 h9" stroke="rgba(255,255,255,0.35)" stroke-width="1.1" stroke-linecap="round"/>'+
+       '<path d="M20,10 L26,10 L26,30 L23,26 L20,30 Z" fill="url(#bookRibbon)"/>'+
+       '<path d="M10,10 L34,10 L34,12.6 L10,12.6 Z" fill="rgba(255,255,255,0.14)"/>'+
+     '</svg>'+
+   '</div>'+
    '<div class="subj-pdf-label">Detailed Theory &amp; Case Studies</div>'+
    '<div class="subj-pdf-desc">Extended theory, subtopics, methodologies and case studies for '+name+'.</div>'+
    '<div class="subj-pdf-actions"><a class="subj-pdf-btn view" href="'+u2+'" target="_blank" rel="noopener">View</a>'+
