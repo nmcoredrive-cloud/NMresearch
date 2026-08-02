@@ -4,7 +4,3 @@ dist
 .env.local
 .DS_Store
 *.log
-
-v0.1/
-.vite/
-*.rar
