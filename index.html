@@ -101,23 +101,49 @@
 <!-- Real company logo, generated at the sizes browsers/OSes request.
      favicon.ico covers old browsers that ignore <link rel="icon">;
      apple-touch-icon covers "Add to Home Screen" on iOS. -->
-<link rel="icon" href="favicon.ico" sizes="any">
-<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
-<link rel="icon" type="image/png" sizes="48x48" href="favicon-48.png">
-<link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
-<link rel="icon" type="image/png" sizes="512x512" href="favicon-512.png">
-<link rel="apple-touch-icon" sizes="180x180" href="favicon-180.png">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="/favicon-512.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/favicon-180.png">
 <!-- Social preview. Without these, sharing the link on WhatsApp or
      LinkedIn shows a bare URL with no title, image or description. -->
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="NM Group of Industries and Research Foundation">
 <meta property="og:title" content="NM Group of Industries and Research Foundation">
 <meta property="og:description" content="A global research and innovation ecosystem — 155+ research subjects across 11 domains, publication support, PhD assistance and analytical services.">
-<meta property="og:image" content="favicon-512.png">
+<meta property="og:image" content="https://nmresearch.co.in/favicon-512.png">
+<meta property="og:url" content="https://nmresearch.co.in">
 <meta name="twitter:card" content="summary_large_image">
 <title>NM Group of Industries and Research Foundation | Innovate. Research. Publish. Impact.</title>
 <meta name="description" content="NM Group of Industries and Research Foundation — A world-class global research and innovation ecosystem empowering researchers, students, and industries worldwide.">
+<!-- Structured data: tells Google what to show as your "Site Name" and
+     which image to use as your logo in search results / Knowledge Panel.
+     This is the mechanism that produces the logo-next-to-name look
+     (e.g. what a LinkedIn company page gets automatically). -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "NM Group of Industries and Research Foundation",
+  "alternateName": "NM Group",
+  "url": "https://nmresearch.co.in",
+  "logo": "https://nmresearch.co.in/favicon-512.png",
+  "description": "A global research and innovation ecosystem — 155+ research subjects across 11 domains, publication support, PhD assistance and analytical services.",
+  "email": "hello.nmassociation@gmail.com",
+  "telephone": "+91-8667334697"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "NM Group of Industries and Research Foundation",
+  "url": "https://nmresearch.co.in"
+}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,700&family=Source+Sans+3:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -171,7 +197,7 @@ body {
 nav {
   position: fixed; top: 0; left: 0; right: 0;
   z-index: 1000;
-  padding: 0 2rem;
+  padding: 0 1.25rem;
   height: 78px;
   display: flex; align-items: center; justify-content: space-between;
   background: rgba(7,24,69,0.97);
@@ -421,22 +447,6 @@ nav.scrolled {
   color: #ffffff;
   letter-spacing: 0.12em;
 }
-.mnav-close {
-  width: 36px; height: 36px;
-  border-radius: 10px;
-  background: rgba(255,255,255,0.07);
-  border: 1px solid rgba(255,255,255,0.1);
-  color: rgba(255,255,255,0.7);
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s;
-  -webkit-tap-highlight-color: transparent;
-}
-.mnav-close:active {
-  background: rgba(255,255,255,0.14);
-  transform: scale(0.92);
-  color: #fff;
-}
 
 /* ── NAV LIST ── */
 .mnav-list {
@@ -680,7 +690,7 @@ nav.scrolled {
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  gap: 4px;
+  gap: 5px;
   -webkit-tap-highlight-color: transparent;
   transition: background 0.25s, border-color 0.25s, box-shadow 0.25s;
   box-shadow: 0 2px 12px rgba(10,36,99,0.3);
@@ -704,40 +714,31 @@ nav.scrolled {
 }
 .nav-hamburger:active::before { opacity: 1; }
 
-/* 3 info dots */
-.hb-dot {
+/* 2-bar menu icon */
+.hb-bar {
   display: block;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
+  width: 20px;
+  height: 2px;
+  border-radius: 2px;
   background: #ffffff;
   flex-shrink: 0;
   transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1),
               opacity 0.25s ease,
               background 0.25s;
-  box-shadow: 0 0 6px rgba(255,255,255,0.5);
+  box-shadow: 0 0 6px rgba(255,255,255,0.4);
 }
-/* Stagger the dot sizes slightly for visual interest */
-.hb-dot:nth-child(1) { transform: scale(0.8); opacity: 0.7; }
-.hb-dot:nth-child(2) { transform: scale(1.1); opacity: 1; }
-.hb-dot:nth-child(3) { transform: scale(0.8); opacity: 0.7; }
 
-/* Active: dots spread and brighten */
-.nav-hamburger:active .hb-dot { background: #ffffff; box-shadow: 0 0 8px rgba(255,255,255,0.8); }
-.nav-hamburger:active .hb-dot:nth-child(1) { transform: scale(1) translateY(-2px); opacity: 1; }
-.nav-hamburger:active .hb-dot:nth-child(2) { transform: scale(1.2); opacity: 1; }
-.nav-hamburger:active .hb-dot:nth-child(3) { transform: scale(1) translateY(2px); opacity: 1; }
+.nav-hamburger:active .hb-bar { background: #ffffff; box-shadow: 0 0 8px rgba(255,255,255,0.8); }
 
-/* When open — dots shift to X hint */
+/* When open — bars morph into an X */
 .nav-hamburger.open {
   background: rgba(201,168,76,0.18);
   border-color: rgba(201,168,76,0.6);
   box-shadow: 0 4px 20px rgba(201,168,76,0.3);
 }
-.nav-hamburger.open .hb-dot { background: #ffffff; }
-.nav-hamburger.open .hb-dot:nth-child(1) { transform: translateY(3px) scale(0.9); opacity: 0.8; }
-.nav-hamburger.open .hb-dot:nth-child(2) { transform: scale(1.3); opacity: 1; box-shadow: 0 0 10px rgba(255,255,255,0.9); }
-.nav-hamburger.open .hb-dot:nth-child(3) { transform: translateY(-3px) scale(0.9); opacity: 0.8; }
+.nav-hamburger.open .hb-bar { background: #ffffff; }
+.nav-hamburger.open .hb-bar:nth-child(1) { transform: translateY(3.5px) rotate(45deg); }
+.nav-hamburger.open .hb-bar:nth-child(2) { transform: translateY(-3.5px) rotate(-45deg); }
 
 /* Pulsing glow animation when closed */
 @keyframes hbPulse {
@@ -806,21 +807,21 @@ nav.scrolled {
 .rotating-word {
   position: absolute;
   top: 0; left: 0;
-  transform: translateY(100%);
   white-space: nowrap;
   opacity: 0;
+  transform: translateY(18px);
   color: var(--accent-blue);
-  transition: transform 0.6s cubic-bezier(0.34, 1.2, 0.4, 1), opacity 0.5s ease;
+  transition: opacity 0.9s cubic-bezier(0.22, 0.68, 0.36, 1), transform 0.9s cubic-bezier(0.22, 0.68, 0.36, 1);
   pointer-events: none;
 }
 .rotating-word.is-active {
-  transform: translateY(0);
   opacity: 1;
-  transition: transform 0.6s cubic-bezier(0.34, 1.2, 0.4, 1), opacity 0.5s ease;
+  transform: translateY(0);
 }
-.rotating-word.is-exit-up {
-  transform: translateY(-100%);
+.rotating-word.is-exit {
   opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
 }
 @media (max-width: 600px) {
   .line2-wrap { height: 1.3em; }
@@ -2556,6 +2557,7 @@ body {
   border: none;
   position: relative;
   overflow: hidden;
+  white-space: nowrap;
 }
 .btn-outline {
   background: transparent;
@@ -3285,15 +3287,11 @@ section { padding: var(--section-py) var(--px); }
     position: absolute;
     top: 0;
     left: 50%;
-    transform: translateX(-50%) translateY(100%);
+    transform: translateX(-50%) translateY(18px);
     white-space: nowrap;
   }
-  .rotating-word.is-active {
-    transform: translateX(-50%) translateY(0);
-  }
-  .rotating-word.is-exit-up {
-    transform: translateX(-50%) translateY(-100%);
-  }
+  .rotating-word.is-active { transform: translateX(-50%) translateY(0); }
+  .rotating-word.is-exit { transform: translateX(-50%) translateY(-10px); }
 
   /* About */
   .about-grid { grid-template-columns: 1fr; gap: 2rem; }
@@ -3334,10 +3332,11 @@ section { padding: var(--section-py) var(--px); }
 @media (max-width: 768px) {
 
   /* Nav */
-  nav { padding: 0 var(--px); height: 68px; }
+  nav { padding: 0 1rem; height: 68px; }
   .nav-links { display: none; }
   .nav-actions .btn-outline { display: none; }
   .nav-hamburger { display: flex; }
+  .btn-sm { padding: 6px 14px; font-size: 0.72rem; }
   .mobile-nav { top: 68px; padding: 1.2rem var(--px); }
   .mobile-nav a { font-size: 0.95rem; padding: 12px 16px; border-radius: 10px; }
 
@@ -3398,7 +3397,7 @@ section { padding: var(--section-py) var(--px); }
   .hero-sub { font-size: 0.95rem; }
   .hero-cta { flex-direction: column; align-items: center; gap: 0.8rem; width: 100%; }
   .btn-hero-primary,
-  .btn-hero-accent { width: 100%; justify-content: center; padding: 15px 24px; font-size: 0.9rem; }
+  .btn-hero-accent { width: 100%; justify-content: center; padding: 12px 20px; font-size: 0.85rem; }
   .atom-wrap { width: min(240px, 75%); }
 
   /* Section headers */
@@ -3450,9 +3449,12 @@ section { padding: var(--section-py) var(--px); }
 
   /* Nav */
   nav { padding: 0 1rem; height: 62px; }
-  .nav-logo-img { width: 44px; height: 44px; }
+  .nav-logo { gap: 8px; }
+  .nav-logo-img { width: 40px; height: 40px; }
   .nav-logo-nm { font-size: 0.95rem; }
-  .nav-logo-sub { display: none; }
+  .nav-logo-sub { font-size: 0.48rem; letter-spacing: 0.03em; }
+  .nav-actions { gap: 0.4rem; }
+  .btn-sm { padding: 6px 12px; font-size: 0.68rem; }
   .mobile-nav { top: 62px; }
 
   #home { padding-top: 80px; }
@@ -3461,7 +3463,7 @@ section { padding: var(--section-py) var(--px); }
   .hero-title { font-size: clamp(1.7rem, 7.5vw, 2.4rem); }
   .hero-cta { gap: 0.7rem; }
   .btn-hero-primary,
-  .btn-hero-accent { padding: 13px 20px; font-size: 0.87rem; }
+  .btn-hero-accent { padding: 11px 18px; font-size: 0.82rem; }
 
   /* Cards */
   .service-card { padding: 1.4rem 1.2rem; }
@@ -3645,10 +3647,12 @@ body, html { overflow-x: hidden; max-width: 100vw; }
 }
 
 /* ── SAFE AREA (notched phones) ── */
-@supports (padding: env(safe-area-inset-left)) {
-  nav { padding-left: max(var(--px), env(safe-area-inset-left)); padding-right: max(var(--px), env(safe-area-inset-right)); }
-  .mobile-nav { padding-left: max(var(--px), env(safe-area-inset-left)); padding-right: max(var(--px), env(safe-area-inset-right)); }
-  footer { padding-bottom: max(2rem, env(safe-area-inset-bottom)); }
+@media (max-width: 480px) {
+  @supports (padding: env(safe-area-inset-left)) {
+    nav { padding-left: max(1rem, env(safe-area-inset-left)); padding-right: max(1rem, env(safe-area-inset-right)); }
+    .mobile-nav { padding-left: max(1rem, env(safe-area-inset-left)); padding-right: max(1rem, env(safe-area-inset-right)); }
+    footer { padding-bottom: max(2rem, env(safe-area-inset-bottom)); }
+  }
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -3671,13 +3675,13 @@ body, html { overflow-x: hidden; max-width: 100vw; }
   .btn-hero-primary,
   .btn-hero-accent {
     width: 100%;
-    padding: 17px 24px;
-    font-size: 1rem;
+    padding: 12px 20px;
+    font-size: 0.85rem;
     font-weight: 700;
     border-radius: 14px;
     justify-content: center;
     letter-spacing: 0.02em;
-    min-height: 54px;
+    min-height: 46px;
     -webkit-tap-highlight-color: transparent;
   }
   .btn-hero-primary {
@@ -3758,10 +3762,10 @@ body, html { overflow-x: hidden; max-width: 100vw; }
 
   .btn-hero-primary,
   .btn-hero-accent {
-    padding: 16px 20px;
-    font-size: 0.95rem;
+    padding: 11px 18px;
+    font-size: 0.82rem;
     border-radius: 13px;
-    min-height: 52px;
+    min-height: 42px;
   }
   .hero-cta { max-width: 100%; }
 
@@ -3934,8 +3938,9 @@ footer { padding: 5.5rem 2rem 2.4rem; }
 .section-sub { max-width: 620px; line-height: 1.85; }
 @media (max-width: 900px) { section { padding: 96px 1.5rem; } }
 
-/* ── Navbar: quieter, more air ── */
-nav { padding: 0 2.6rem; height: 84px; }
+/* (removed duplicate unconditional nav rule that was overriding
+   every responsive breakpoint's padding/height — see base nav
+   rule and the @media blocks for the real, working values) */
 
 /* ── Service cards (icon + title + desc + card surface) ──
    NOTE: .service-tags / .stag pills inside are intentionally untouched. */
@@ -4037,7 +4042,7 @@ nav { padding: 0 2.6rem; height: 84px; }
     </div>
     <div class="nav-logo-text">
       <div class="nav-logo-nm">NM GROUP</div>
-      <div class="nav-logo-sub">Industries & Research Foundation</div>
+      <div class="nav-logo-sub">Of Industries & Research Foundation</div>
     </div>
   </a>
   <ul class="nav-links">
@@ -4244,9 +4249,8 @@ nav { padding: 0 2.6rem; height: 84px; }
       <span class="nav-user-name" id="navUserName"></span>
     </div>
     <button class="nav-hamburger" onclick="toggleMobileNav()" aria-label="Menu">
-      <span class="hb-dot"></span>
-      <span class="hb-dot"></span>
-      <span class="hb-dot"></span>
+      <span class="hb-bar"></span>
+      <span class="hb-bar"></span>
     </button>
   </div>
 </nav>
@@ -4278,9 +4282,6 @@ nav { padding: 0 2.6rem; height: 84px; }
       <div class="mnav-brand-dot"></div>
       <span class="mnav-brand-text">NM GROUP</span>
     </div>
-    <button class="mnav-close" onclick="closeMobileNav()" aria-label="Close menu">
-      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-    </button>
   </div>
 
   <!-- Nav items -->
@@ -6164,7 +6165,7 @@ document.addEventListener('keydown', function(e){ if(e.key==='Escape') closePayM
 </script>
 
 <script>
-// ROTATING HERO HEADLINE WORD
+// ROTATING HERO HEADLINE WORD — pure crossfade, no movement
 (function(){
   const words = document.querySelectorAll('#rotatingWordWrap .rotating-word');
   if (!words.length) return;
@@ -6175,21 +6176,11 @@ document.addEventListener('keydown', function(e){ if(e.key==='Escape') closePayM
     const prevIdx = current;
     current = (current + 1) % words.length;
     words[prevIdx].classList.remove('is-active');
-    words[prevIdx].classList.add('is-exit-up');
-    words[current].classList.remove('is-exit-up');
-    // force reflow so the entering word starts from below again
-    words[current].style.transition = 'none';
-    words[current].style.transform = 'translateY(100%)';
-    words[current].style.opacity = '0';
-    requestAnimationFrame(() => {
-      words[current].style.transition = '';
-      words[current].style.transform = '';
-      words[current].style.opacity = '';
-      words[current].classList.add('is-active');
-    });
-    setTimeout(() => { words[prevIdx].classList.remove('is-exit-up'); }, 650);
+    words[prevIdx].classList.add('is-exit');
+    words[current].classList.add('is-active');
+    setTimeout(() => { words[prevIdx].classList.remove('is-exit'); }, 650);
   }
-  setInterval(next, 2200);
+  setInterval(next, 3600);
 })();
 </script>
 
