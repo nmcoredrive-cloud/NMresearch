@@ -5596,6 +5596,7 @@ async function handleFormSubmit(btn) {
   const [nameEl, emailEl, subjectEl, domainEl, messageEl] = inputs;
 
   const payload = {
+    formType: 'contact',
     name:    nameEl.value.trim(),
     email:   emailEl.value.trim(),
     subject: subjectEl.value.trim(),
@@ -5623,7 +5624,7 @@ async function handleFormSubmit(btn) {
     const data = await res.json();
 
     if (res.ok && data.ok) {
-      showFormFeedback(btn, '✅ Message sent! We\'ll reply within 1–2 days.', '#22c55e', true);
+      showFormFeedback(btn, '✅ Sent! Our team has been notified by email — we\'ll reply within 1–2 days.', '#22c55e', true);
       // Clear the form
       inputs.forEach(el => { el.value = ''; el.selectedIndex = 0; });
     } else {
@@ -5672,25 +5673,21 @@ function handleRegSubmit(btn) {
     return;
   }
 
-  const bodyLines = [
-    `Name: ${name}`,
-    `Designation: ${designation}`,
-    `Degree: ${degree}`,
-    `Research Field: ${field}`,
-    experience ? `Research Experience: ${experience}` : null,
-    publications ? `Publications: ${publications}` : null,
-    `Contact Number: ${contact}`,
-    whatsapp ? `WhatsApp Number: ${whatsapp}` : null,
-    `Mail ID: ${email}`,
-    `Affiliation: ${affiliation}`,
-  ].filter(Boolean);
+  const payload = {
+    formType: 'registration',
+    name, email,
+    message: `Researcher registration request from ${name}.`,
+    Designation: designation,
+    Degree: degree,
+    'Research Field': field,
+    'Research Experience': experience || undefined,
+    Publications: publications || undefined,
+    'Contact Number': contact,
+    'WhatsApp Number': whatsapp || undefined,
+    Affiliation: affiliation,
+  };
 
-  const mailto = `mailto:hello.nmassociation@gmail.com`
-    + `?subject=${encodeURIComponent('Researcher Registration — ' + name)}`
-    + `&body=${encodeURIComponent(bodyLines.join('\n'))}`;
-
-  window.location.href = mailto;
-  showFormFeedback(btn, '✅ Opening your email app…', '#22c55e', true);
+  submitFormPayload(btn, payload);
 }
 
 function handleCommunitySubmit(btn) {
@@ -5705,20 +5702,44 @@ function handleCommunitySubmit(btn) {
     return;
   }
 
-  const bodyLines = [
-    `Name: ${name}`,
-    `Mail ID: ${email}`,
-    `Contact Number: ${contact}`,
-    affiliation ? `Affiliation: ${affiliation}` : null,
-    field ? `Area of Interest: ${field}` : null,
-  ].filter(Boolean);
+  const payload = {
+    formType: 'community',
+    name, email,
+    message: `Join Research Community request from ${name}.`,
+    'Contact Number': contact,
+    Affiliation: affiliation || undefined,
+    'Area of Interest': field || undefined,
+  };
 
-  const mailto = `mailto:hello.nmassociation@gmail.com`
-    + `?subject=${encodeURIComponent('Join Research Community — ' + name)}`
-    + `&body=${encodeURIComponent(bodyLines.join('\n'))}`;
+  submitFormPayload(btn, payload);
+}
 
-  window.location.href = mailto;
-  showFormFeedback(btn, '✅ Opening your email app…', '#22c55e', true);
+async function submitFormPayload(btn, payload) {
+  btn.disabled = true;
+  const originalText = btn.textContent;
+  btn.textContent = '⏳ Sending…';
+  btn.style.opacity = '0.7';
+
+  try {
+    const res  = await fetch(`${API_BASE}/api/contact`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(payload),
+    });
+    const data = await res.json();
+
+    if (res.ok && data.ok) {
+      showFormFeedback(btn, '✅ Sent! Our team has been notified by email — we\'ll reply soon.', '#22c55e', true);
+    } else {
+      showFormFeedback(btn, `⚠️ ${data.error || 'Submission failed.'}`, '#e63946', false);
+      btn.textContent = originalText;
+    }
+  } catch (err) {
+    showFormFeedback(btn, '❌ Network error. Please try again.', '#e63946', false);
+    btn.textContent = originalText;
+  } finally {
+    btn.style.opacity = '1';
+  }
 }
 
 function showFormFeedback(btn, text, color, success) {
