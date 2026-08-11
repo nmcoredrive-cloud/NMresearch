@@ -5587,82 +5587,51 @@ async function sendAiMsg() {
   }
 }
 
-// ── SHARED: post any of the 3 forms to /api/contact, uniformly ─────────────
-// All three forms (Contact, Registration, Community) funnel through this one
-// function so there's exactly one place that talks to the network, one place
-// that parses the response, and one failure mode to debug — instead of three
-// slightly different copies drifting out of sync.
-async function nmSubmitToContactApi(btn, payload, inputsToReset) {
-  // Capture the button's real original markup (icon + label) ONCE, before
-  // we overwrite it — showFormFeedback's timeout restores THIS, not a
-  // hardcoded string. Previously every button (Submit Registration, Join
-  // the Community, Send Message) reset to the same hardcoded "🚀 Send
-  // Message" text after 4-5s, silently mislabeling two of the three buttons.
-  if (btn.dataset.originalHtml === undefined) btn.dataset.originalHtml = btn.innerHTML;
-
-  btn.disabled      = true;
-  btn.textContent    = '⏳ Sending…';
-  btn.style.opacity  = '0.7';
-
-  try {
-    const res = await fetch(`${API_BASE}/api/contact`, {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify(payload),
-    });
-
-    // A non-2xx with no JSON body (e.g. the function crashed, or /api/contact
-    // isn't deployed at all and Vercel returns its own 404 HTML page) must
-    // not be silently swallowed — surface it instead of throwing inside
-    // res.json() and getting a generic "network error" that hides the truth.
-    let data;
-    try {
-      data = await res.json();
-    } catch {
-      showFormFeedback(btn, res.status === 404
-        ? '❌ Contact API not found (404) — is api/contact.js deployed?'
-        : `❌ Server returned an unexpected response (HTTP ${res.status}).`, '#e63946', false);
-      return;
-    }
-
-    if (res.ok && data.ok) {
-      showFormFeedback(btn, '✅ Sent! We\'ll get back to you within 1–2 days.', '#22c55e', true);
-      if (inputsToReset) inputsToReset.forEach(el => { el.value = ''; if (el.tagName === 'SELECT') el.selectedIndex = 0; });
-    } else {
-      // contact.js always replies with { ok:false, error: "..." } — that's
-      // the field to read. The old code looked for data.message/data.errors,
-      // which contact.js never sends, so every real server-side error (bad
-      // key, Resend rejection, missing env var) showed as a generic
-      // "Submission failed." instead of the actual reason.
-      showFormFeedback(btn, `⚠️ ${data.error || 'Submission failed.'}`, '#e63946', false);
-    }
-  } catch (err) {
-    console.error('[contact form] request failed:', err);
-    showFormFeedback(btn, '❌ Network error. Please try again.', '#e63946', false);
-  }
-}
-
 // ── CONTACT FORM — wired to /api/contact ───────────────────────────────────
 async function handleFormSubmit(btn) {
+  // Gather form values
   const form      = btn.closest('.contact-form');
   const inputs    = form.querySelectorAll('.form-input');
   const [nameEl, emailEl, subjectEl, domainEl, messageEl] = inputs;
 
   const payload = {
-    formType: 'contact',
-    name:     nameEl.value.trim(),
-    email:    emailEl.value.trim(),
-    subject:  subjectEl.value.trim(),
-    domain:   domainEl.value || '',
-    message:  messageEl.value.trim(),
+    name:    nameEl.value.trim(),
+    email:   emailEl.value.trim(),
+    subject: subjectEl.value.trim(),
+    domain:  domainEl.value || '',
+    message: messageEl.value.trim(),
   };
 
+  // Basic client-side validation
   if (!payload.name || !payload.email || !payload.subject || !payload.message) {
     showFormFeedback(btn, '⚠️ Please fill in all required fields.', '#e63946', false);
     return;
   }
 
-  await nmSubmitToContactApi(btn, payload, inputs);
+  // Loading state
+  btn.disabled     = true;
+  btn.textContent  = '⏳ Sending…';
+  btn.style.opacity = '0.7';
+
+  try {
+    const res  = await fetch(`${API_BASE}/api/contact`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(payload),
+    });
+    const data = await res.json();
+
+    if (res.ok && data.ok) {
+      showFormFeedback(btn, '✅ Message sent! We\'ll reply within 1–2 days.', '#22c55e', true);
+      // Clear the form
+      inputs.forEach(el => { el.value = ''; el.selectedIndex = 0; });
+    } else {
+      const errMsg = data.errors ? data.errors.map(e => e.msg).join(' ') : (data.message || 'Submission failed.');
+      showFormFeedback(btn, `⚠️ ${errMsg}`, '#e63946', false);
+    }
+  } catch (err) {
+    showFormFeedback(btn, '❌ Network error. Please try again.', '#e63946', false);
+  }
 }
 
 // ── REGISTRATION SECTION ────────────────────────────────────────────────────
@@ -5685,18 +5654,7 @@ function nmSwitchRegTab(tab) {
   }
 }
 
-// FIXED (Aug 2026): this used to build a `mailto:` link and set
-// window.location.href — which only queues a draft in whatever email client
-// the visitor's OS picks (Outlook/Chrome/etc.), and only actually sends if
-// the visitor manually hits Send in that app. On a phone with no mail app
-// configured, or a work laptop where the visitor doesn't want to send from
-// their own address, this silently goes nowhere and you never see it. It
-// also always showed a fake "✅ Opening your email app…" success message
-// regardless of whether anything happened. Now posts to /api/contact —
-// the same server-side Resend endpoint the Contact form uses — so the
-// email actually leaves your server and lands in your inbox every time,
-// with no dependency on the visitor's device.
-async function handleRegSubmit(btn) {
+function handleRegSubmit(btn) {
   const name        = document.getElementById('reg-name').value.trim();
   const designation = document.getElementById('reg-designation').value.trim();
   const degree       = document.getElementById('reg-degree').value.trim();
@@ -5713,25 +5671,28 @@ async function handleRegSubmit(btn) {
     return;
   }
 
-  const payload = {
-    formType: 'registration',
-    name, email,
-    subject: 'Researcher Registration — ' + name,
-    message: `New researcher registration submitted via the website.\n\nName: ${name}\nDesignation: ${designation}`,
-    Designation: designation,
-    Degree: degree,
-    'Research Field': field,
-    'Research Experience': experience || undefined,
-    Publications: publications || undefined,
-    'Contact Number': contact,
-    'WhatsApp Number': whatsapp || undefined,
-    Affiliation: affiliation,
-  };
+  const bodyLines = [
+    `Name: ${name}`,
+    `Designation: ${designation}`,
+    `Degree: ${degree}`,
+    `Research Field: ${field}`,
+    experience ? `Research Experience: ${experience}` : null,
+    publications ? `Publications: ${publications}` : null,
+    `Contact Number: ${contact}`,
+    whatsapp ? `WhatsApp Number: ${whatsapp}` : null,
+    `Mail ID: ${email}`,
+    `Affiliation: ${affiliation}`,
+  ].filter(Boolean);
 
-  await nmSubmitToContactApi(btn, payload, null);
+  const mailto = `mailto:hello.nmassociation@gmail.com`
+    + `?subject=${encodeURIComponent('Researcher Registration — ' + name)}`
+    + `&body=${encodeURIComponent(bodyLines.join('\n'))}`;
+
+  window.location.href = mailto;
+  showFormFeedback(btn, '✅ Opening your email app…', '#22c55e', true);
 }
 
-async function handleCommunitySubmit(btn) {
+function handleCommunitySubmit(btn) {
   const name        = document.getElementById('comm-name').value.trim();
   const email        = document.getElementById('comm-email').value.trim();
   const contact      = document.getElementById('comm-contact').value.trim();
@@ -5743,25 +5704,23 @@ async function handleCommunitySubmit(btn) {
     return;
   }
 
-  const payload = {
-    formType: 'community',
-    name, email,
-    subject: 'Join Research Community — ' + name,
-    message: `New "Join Research Community" request submitted via the website.\n\nName: ${name}`,
-    'Contact Number': contact,
-    Affiliation: affiliation || undefined,
-    'Area of Interest': field || undefined,
-  };
+  const bodyLines = [
+    `Name: ${name}`,
+    `Mail ID: ${email}`,
+    `Contact Number: ${contact}`,
+    affiliation ? `Affiliation: ${affiliation}` : null,
+    field ? `Area of Interest: ${field}` : null,
+  ].filter(Boolean);
 
-  await nmSubmitToContactApi(btn, payload, null);
+  const mailto = `mailto:hello.nmassociation@gmail.com`
+    + `?subject=${encodeURIComponent('Join Research Community — ' + name)}`
+    + `&body=${encodeURIComponent(bodyLines.join('\n'))}`;
+
+  window.location.href = mailto;
+  showFormFeedback(btn, '✅ Opening your email app…', '#22c55e', true);
 }
 
 function showFormFeedback(btn, text, color, success) {
-  // Same capture-once guard as nmSubmitToContactApi, for the client-side
-  // "please fill required fields" path which bypasses that function and
-  // calls straight here without ever touching btn.innerHTML first.
-  if (btn.dataset.originalHtml === undefined) btn.dataset.originalHtml = btn.innerHTML;
-
   btn.disabled     = false;
   btn.textContent  = text;
   btn.style.opacity   = '1';
@@ -5770,10 +5729,7 @@ function showFormFeedback(btn, text, color, success) {
     : `linear-gradient(135deg, ${color}, ${color}cc)`;
   btn.style.color  = '#fff';
   setTimeout(() => {
-    // Restore THIS button's real original label (icon + text), not a
-    // one-size-fits-all string. Fixes "Submit Registration" / "Join the
-    // Community" permanently turning into "🚀 Send Message" after ~4-5s.
-    btn.innerHTML    = btn.dataset.originalHtml;
+    btn.textContent  = '🚀 Send Message';
     btn.style.background = '';
     btn.style.color  = '';
   }, success ? 5000 : 4000);
