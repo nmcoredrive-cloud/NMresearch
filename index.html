@@ -5030,6 +5030,7 @@ nav.scrolled { background: #faf9f4; box-shadow: 0 2px 12px rgba(10,36,99,0.06); 
           </div>
         </div>
 
+        <input type="text" id="reg-hp" name="_hp" autocomplete="off" tabindex="-1" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;">
         <button class="btn-submit" onclick="handleRegSubmit(this)">Submit Registration</button>
       </div>
     </div>
@@ -5092,6 +5093,7 @@ nav.scrolled { background: #faf9f4; box-shadow: 0 2px 12px rgba(10,36,99,0.06); 
           </select>
         </div>
 
+        <input type="text" id="comm-hp" name="_hp" autocomplete="off" tabindex="-1" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;">
         <button class="btn-submit" onclick="handleCommunitySubmit(this)">Join the Community</button>
       </div>
     </div>
@@ -5456,6 +5458,7 @@ nav.scrolled { background: #faf9f4; box-shadow: 0 2px 12px rgba(10,36,99,0.06); 
           <label class="form-label">Message</label>
           <textarea class="form-input" placeholder="Describe your research needs or questions..."></textarea>
         </div>
+        <input type="text" id="cf-hp" name="_hp" autocomplete="off" tabindex="-1" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;">
         <button class="btn-submit" onclick="handleFormSubmit(this)">Send Message <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="flex-shrink:0"><path d="M14 2L2 6.5l5 2L14 2zM9 8.5l2 5L14 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
       </div>
     </div>
@@ -5858,12 +5861,15 @@ async function sendAiMsg() {
   }
 }
 
-// ── CONTACT FORM — sends via FormSubmit (no custom backend required) ───────
+// ── CONTACT FORM — sends via our own /api/contact backend (Resend) ─────────
+let __contactSubmitting = false;
 async function handleFormSubmit(btn) {
+  if (__contactSubmitting) return; // prevent duplicate submissions
   // Gather form values
   const form      = btn.closest('.contact-form');
   const inputs    = form.querySelectorAll('.form-input');
   const [nameEl, emailEl, subjectEl, domainEl, messageEl] = inputs;
+  const hpEl      = document.getElementById('cf-hp');
 
   const payload = {
     name:    nameEl.value.trim(),
@@ -5871,6 +5877,7 @@ async function handleFormSubmit(btn) {
     subject: subjectEl.value.trim(),
     domain:  domainEl.value || '',
     message: messageEl.value.trim(),
+    _hp:     hpEl ? hpEl.value : '',
   };
 
   // Basic client-side validation
@@ -5880,36 +5887,32 @@ async function handleFormSubmit(btn) {
   }
 
   // Loading state
+  __contactSubmitting = true;
   btn.disabled     = true;
-  btn.textContent  = '⏳ Sending…';
+  btn.textContent  = 'Sending...';
   btn.style.opacity = '0.7';
 
   try {
-    const res = await fetch('https://formsubmit.co/ajax/hello.nmassociation@gmail.com', {
+    const res = await fetch('/api/contact', {
       method:  'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'application/json' },
-      body: new URLSearchParams({
-        name:                payload.name,
-        email:               payload.email,
-        subject:             payload.subject,
-        research_domain:     payload.domain,
-        message:             payload.message,
-        _subject:            `NM Group website — new message from ${payload.name}`,
-        _template:           'table',
-        _captcha:            'false',
-      }).toString(),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
     });
-    const data = await res.json();
+    const data = await res.json().catch(() => ({}));
 
-    if (res.ok && (data.success === 'true' || data.success === true)) {
-      showFormFeedback(btn, '✅ Message sent! We\'ll reply within 1–2 days.', '#22c55e', true);
-      // Clear the form
+    if (res.ok && data.success) {
+      showFormFeedback(btn, '✓ Message sent successfully. We will get back to you soon.', '#22c55e', true);
+      // Clear the form only on confirmed success
       inputs.forEach(el => { el.value = ''; el.selectedIndex = 0; });
     } else {
-      showFormFeedback(btn, `⚠️ ${data.message || 'Submission failed. Please try again.'}`, '#e63946', false);
+      console.error('Contact form error:', data);
+      showFormFeedback(btn, 'Unable to send your request right now. Please try again in a few minutes.', '#e63946', false);
     }
   } catch (err) {
-    showFormFeedback(btn, '❌ Network error. Please try again.', '#e63946', false);
+    console.error('Contact form network error:', err);
+    showFormFeedback(btn, 'Unable to send your request right now. Please try again in a few minutes.', '#e63946', false);
+  } finally {
+    __contactSubmitting = false;
   }
 }
 
@@ -5933,7 +5936,9 @@ function nmSwitchRegTab(tab) {
   }
 }
 
+let __regSubmitting = false;
 async function handleRegSubmit(btn) {
+  if (__regSubmitting) return; // prevent duplicate submissions
   const name        = document.getElementById('reg-name').value.trim();
   const designation = document.getElementById('reg-designation').value.trim();
   const degree       = document.getElementById('reg-degree').value.trim();
@@ -5944,89 +5949,90 @@ async function handleRegSubmit(btn) {
   const whatsapp      = document.getElementById('reg-whatsapp').value.trim();
   const email        = document.getElementById('reg-email').value.trim();
   const affiliation  = document.getElementById('reg-affiliation').value.trim();
+  const hpEl         = document.getElementById('reg-hp');
 
   if (!name || !designation || !degree || !field || !contact || !email || !affiliation) {
     showFormFeedback(btn, '⚠️ Please fill in all required fields.', '#e63946', false);
     return;
   }
 
+  __regSubmitting = true;
   btn.disabled     = true;
-  btn.textContent  = '⏳ Sending…';
+  btn.textContent  = 'Sending...';
   btn.style.opacity = '0.7';
 
   try {
-    const res = await fetch('https://formsubmit.co/ajax/hello.nmassociation@gmail.com', {
+    const res = await fetch('/api/register', {
       method:  'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'application/json' },
-      body: new URLSearchParams({
-        name, designation, degree,
-        research_field:      field,
-        research_experience: experience || 'Not specified',
-        publications:        publications || 'None listed',
-        contact_number:      contact,
-        whatsapp_number:     whatsapp || 'Not provided',
-        email,
-        affiliation,
-        _subject: `Researcher Registration — ${name}`,
-        _template: 'table',
-        _captcha: 'false',
-      }).toString(),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name, designation, degree, field, experience, publications,
+        contact, whatsapp, email, affiliation,
+        _hp: hpEl ? hpEl.value : '',
+      }),
     });
-    const data = await res.json();
-    if (res.ok && (data.success === 'true' || data.success === true)) {
-      showFormFeedback(btn, '✅ Registration sent! We\'ll be in touch soon.', '#22c55e', true);
+    const data = await res.json().catch(() => ({}));
+    if (res.ok && data.success) {
+      showFormFeedback(btn, '✓ Registration submitted successfully. We will get back to you soon.', '#22c55e', true);
       [ 'reg-name','reg-designation','reg-degree','reg-field','reg-experience',
         'reg-publications','reg-contact','reg-whatsapp','reg-email','reg-affiliation'
       ].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
     } else {
-      showFormFeedback(btn, `⚠️ ${data.message || 'Submission failed. Please try again.'}`, '#e63946', false);
+      console.error('Registration form error:', data);
+      showFormFeedback(btn, 'Unable to send your request right now. Please try again in a few minutes.', '#e63946', false);
     }
   } catch (err) {
-    showFormFeedback(btn, '❌ Network error. Please try again.', '#e63946', false);
+    console.error('Registration form network error:', err);
+    showFormFeedback(btn, 'Unable to send your request right now. Please try again in a few minutes.', '#e63946', false);
+  } finally {
+    __regSubmitting = false;
   }
 }
 
+let __commSubmitting = false;
 async function handleCommunitySubmit(btn) {
   const name        = document.getElementById('comm-name').value.trim();
+  if (__commSubmitting) return; // prevent duplicate submissions
   const email        = document.getElementById('comm-email').value.trim();
   const contact      = document.getElementById('comm-contact').value.trim();
   const affiliation  = document.getElementById('comm-affiliation').value.trim();
   const field        = document.getElementById('comm-field').value;
+  const hpEl         = document.getElementById('comm-hp');
 
   if (!name || !email || !contact) {
     showFormFeedback(btn, '⚠️ Please fill in all required fields.', '#e63946', false);
     return;
   }
 
+  __commSubmitting = true;
   btn.disabled     = true;
-  btn.textContent  = '⏳ Sending…';
+  btn.textContent  = 'Sending...';
   btn.style.opacity = '0.7';
 
   try {
-    const res = await fetch('https://formsubmit.co/ajax/hello.nmassociation@gmail.com', {
+    const res = await fetch('/api/community', {
       method:  'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'application/json' },
-      body: new URLSearchParams({
-        name, email,
-        contact_number: contact,
-        affiliation:    affiliation || 'Not provided',
-        area_of_interest: field || 'Not specified',
-        _subject: `Join Research Community — ${name}`,
-        _template: 'table',
-        _captcha: 'false',
-      }).toString(),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name, email, contact, affiliation, field,
+        _hp: hpEl ? hpEl.value : '',
+      }),
     });
-    const data = await res.json();
-    if (res.ok && (data.success === 'true' || data.success === true)) {
-      showFormFeedback(btn, '✅ Request sent! Welcome to the community.', '#22c55e', true);
+    const data = await res.json().catch(() => ({}));
+    if (res.ok && data.success) {
+      showFormFeedback(btn, '✓ Request submitted successfully. We will get back to you soon.', '#22c55e', true);
       ['comm-name','comm-email','comm-contact','comm-affiliation','comm-field'].forEach(id => {
         const el = document.getElementById(id); if (el) el.value = '';
       });
     } else {
-      showFormFeedback(btn, `⚠️ ${data.message || 'Submission failed. Please try again.'}`, '#e63946', false);
+      console.error('Community form error:', data);
+      showFormFeedback(btn, 'Unable to send your request right now. Please try again in a few minutes.', '#e63946', false);
     }
   } catch (err) {
-    showFormFeedback(btn, '❌ Network error. Please try again.', '#e63946', false);
+    console.error('Community form network error:', err);
+    showFormFeedback(btn, 'Unable to send your request right now. Please try again in a few minutes.', '#e63946', false);
+  } finally {
+    __commSubmitting = false;
   }
 }
 
