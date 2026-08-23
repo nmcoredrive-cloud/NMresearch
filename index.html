@@ -5485,7 +5485,57 @@ nav.scrolled { background: #faf9f4; box-shadow: 0 2px 12px rgba(10,36,99,0.06); 
 <!-- SCROLL TO TOP -->
 <div id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</div>
 
-<!-- Chatbot widget removed completely — no chat UI on this site -->
+<!-- ══════════════════════════════════════════════════════════════════
+     CHATBASE CHATBOT — WEBSITE EMBED
+     Safe for public HTML — no secret keys here, just the public embed
+     script. Loads the chat bubble in the corner of the site.
+     ══════════════════════════════════════════════════════════════════ -->
+<script>
+(function(){
+  if (!window.chatbase || window.chatbase("getState") !== "initialized") {
+    window.chatbase = (...args) => {
+      if (!window.chatbase.q) { window.chatbase.q = []; }
+      window.chatbase.q.push(args);
+    };
+    window.chatbase = new Proxy(window.chatbase, {
+      get(target, prop) {
+        if (prop === "q") { return target.q; }
+        return (...args) => target(prop, ...args);
+      }
+    });
+  }
+
+  const onLoad = function(){
+    const script = document.createElement("script");
+    script.src = "https://www.chatbase.co/embed.min.js";
+    // Replace with YOUR chatbot ID from Chatbase (Settings → Embed on website)
+    script.id = "_i-08eyDX_w9qX7UKq-ED";
+    script.setAttribute("domain", "www.chatbase.co");
+    document.body.appendChild(script);
+  };
+
+  if (document.readyState === "complete") {
+    onLoad();
+  } else {
+    window.addEventListener("load", onLoad);
+  }
+})();
+</script>
+
+<!-- OPTIONAL: Identity Verification — only add if your site has
+     logged-in users. Needs a server endpoint (see
+     chatbot-server-identify-example.js) that mints the token; never
+     put a secret key here.
+<script>
+  async function nmIdentifyChatUser(){
+    const res = await fetch('/api/chat-identity', { credentials: 'include' });
+    if (!res.ok) return;
+    const { token } = await res.json();
+    window.chatbase('identify', { token });
+  }
+  window.addEventListener('load', nmIdentifyChatUser);
+</script>
+-->
 
 
 <script>
