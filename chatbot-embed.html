@@ -1,0 +1,63 @@
+<!-- ══════════════════════════════════════════════════════════════════
+     CHATBASE CHATBOT — WEBSITE EMBED
+     Drop this block just before </body> in index.html, at the spot
+     where the "Chatbot widget removed completely" comment is.
+
+     This file is 100% safe to put in your public HTML — it contains
+     no secret keys. It only loads Chatbase's public embed script,
+     which shows the chat bubble in the corner of your site.
+     ══════════════════════════════════════════════════════════════════ -->
+
+<script>
+(function(){
+  if (!window.chatbase || window.chatbase("getState") !== "initialized") {
+    window.chatbase = (...args) => {
+      if (!window.chatbase.q) { window.chatbase.q = []; }
+      window.chatbase.q.push(args);
+    };
+    window.chatbase = new Proxy(window.chatbase, {
+      get(target, prop) {
+        if (prop === "q") { return target.q; }
+        return (...args) => target(prop, ...args);
+      }
+    });
+  }
+
+  const onLoad = function(){
+    const script = document.createElement("script");
+    script.src = "https://www.chatbase.co/embed.min.js";
+    // Replace with YOUR chatbot ID from Chatbase (Settings → Embed on website)
+    script.id = "_i-08eyDX_w9qX7UKq-ED";
+    script.setAttribute("domain", "www.chatbase.co");
+    document.body.appendChild(script);
+  };
+
+  if (document.readyState === "complete") {
+    onLoad();
+  } else {
+    window.addEventListener("load", onLoad);
+  }
+})();
+</script>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     OPTIONAL: Identity Verification
+     Only add this if your site has logged-in users and you want the
+     bot to know who it's talking to (e.g. pull their order history).
+     If your chatbot is public / anonymous, skip this entirely — the
+     embed script above is all you need.
+
+     token comes from YOUR OWN server endpoint (see chatbot-server-
+     identify-example.js) — never generate it or store a secret here.
+     ══════════════════════════════════════════════════════════════════ -->
+<!--
+<script>
+  async function nmIdentifyChatUser(){
+    const res = await fetch('/api/chat-identity', { credentials: 'include' });
+    if (!res.ok) return; // user not logged in, or endpoint not ready yet
+    const { token } = await res.json();
+    window.chatbase('identify', { token });
+  }
+  window.addEventListener('load', nmIdentifyChatUser);
+</script>
+-->
